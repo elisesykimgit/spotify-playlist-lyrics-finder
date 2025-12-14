@@ -17,9 +17,23 @@ function sanitizeFilename(name) {
     .replace(/^-+|-+$/g, "");
 }
 
+function csvField(field) {
+  if (field == null) return '""';
+  return `"${String(field).replace(/"/g, '""')}"`;
+}
+
 // Generate CSV content
 function generateCSV(playlist) {
-  const headers = ["Track", "Artist", "Album", "Year", "Lyrics", "YouTube", "Color Coded", "Fandom"];
+  const headers = [
+    "Track",
+    "Artist",
+    "Album",
+    "Year",
+    "Lyrics",
+    "YouTube",
+    "Color Coded",
+    "Fandom",
+  ].map(csvField);
   const rows = playlist.tracks.map((t) => {
     const trackName = t?.track ?? "unknown track";
     const artistName = t?.artist ?? "unknown artist";
@@ -27,15 +41,17 @@ function generateCSV(playlist) {
     const year = t?.year ?? "unknown year";
     const base = `${trackName} ${artistName}`;
 
-    return [
-      trackName,
-      `"${artistName}"`, 
-      albumName,
-      year,
-      google(`${base} lyrics site:genius.com OR site:azlyrics.com OR site:musixmatch.com`),
-      google(`${base} site:youtube.com`),
-      google(`${base} color coded lyrics`),
-      google(`${base} lyrics site:fandom.com`),
+   return [
+      csvField(trackName),
+      csvField(artistName),
+      csvField(albumName),
+      csvField(year),
+      csvField(
+        google(`${base} lyrics site:genius.com OR site:azlyrics.com OR site:musixmatch.com`)
+      ),
+      csvField(google(`${base} site:youtube.com`)),
+      csvField(google(`${base} color coded lyrics`)),
+      csvField(google(`${base} lyrics site:fandom.com`)),
     ];
   });
 
@@ -50,11 +66,14 @@ function generateCSV(playlist) {
 // Download CSV file
 function downloadCSV(playlist) {
   const csvContent = generateCSV(playlist);
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const BOM = "\uFEFF";
+  const blob = new Blob([BOM + csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${sanitizeFilename(playlist.name)}.csv`;
+  link.download = `${sanitizeFilename(playlist.name)}_lyrics.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }
