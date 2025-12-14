@@ -31,7 +31,7 @@ Here’s an example using the playlist:
 **A Very KPop Demon Hunters Christmas 🎄**  
 By KPop Demon Hunters ([Spotify playlist link ](https://open.spotify.com/playlist/3dCgX2WosJLpneAyGQSFga?si=021fa5f7b84243e1))
 
-<img src="public/demo_playlist.png" width="750"/>
+<img src="public/demo_playlist.png" width="650"/>
 
 > This playlist is from the official KPop Demon Hunters Spotify account and has been chosen because it includes both the Netflix show’s original soundtrack and K-pop songs — perfect for exploring YouTube videos, color-coded lyrics, and fandom wikis, which just a Genius search can’t provide.
 
@@ -107,6 +107,7 @@ Can be deployed to:
 * Private playlists require **Spotify login / OAuth** — public playlists work without authentication.
 * Lyrics links are **search-based** (Genius, AZLyrics, Musixmatch) and may **not always point to the exact lyrics**.
 * YouTube videos and Fandom Wiki links may occasionally be missing if the track is rare or not widely documented.
+* **CSV export** contains Google search links (not direct lyrics) — perfect for batch research or sharing with others.
 * Track info is pulled directly from Spotify and displayed in the format:
 
 ```
