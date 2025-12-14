@@ -18,6 +18,7 @@ Search any Spotify playlist and get lyrics, videos, and more — directly from y
   * **YouTube videos**
   * **Color Coded Lyrics**
   * **Fandom Wiki pages**
+* 📥 **Download your results as CSV** — export all tracks with their links for easy sharing or reference
 * 🎨 Clean, **dark Spotify-inspired UI** optimized for desktop and mobile
 * 🌏 Especially helpful for **K-pop, other-language songs, and fictional tracks** from animated shows
 
@@ -28,7 +29,7 @@ Search any Spotify playlist and get lyrics, videos, and more — directly from y
 Here’s an example using the playlist:
 
 **A Very KPop Demon Hunters Christmas 🎄**  
-By KPop Demon Hunters [Spotify playlist link ](https://open.spotify.com/playlist/3dCgX2WosJLpneAyGQSFga?si=021fa5f7b84243e1)
+By KPop Demon Hunters ([Spotify playlist link ](https://open.spotify.com/playlist/3dCgX2WosJLpneAyGQSFga?si=021fa5f7b84243e1))
 
 <img src="public/demo_playlist.png" width="750"/>
 
@@ -38,7 +39,9 @@ By KPop Demon Hunters [Spotify playlist link ](https://open.spotify.com/playlist
 
 Notice how you can quickly get **color coded lyrics**, watch **YouTube videos**, or explore **Fandom Wiki pages** for each track — perfect for K-pop or other non-English songs.
 
-<img src="public/demo_output.png" width="1200"/>
+You can also **download all results as a CSV file** using the ⬇️ download button (top right corner) — hover over it to see the "download as csv" tooltip.
+
+<img src="public/demo_output.png" width="1300"/>
 
 
 ---

@@ -9,6 +9,56 @@ function google(q) {
   return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
 }
 
+// Sanitize filename for CSV download
+function sanitizeFilename(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// Generate CSV content
+function generateCSV(playlist) {
+  const headers = ["Track", "Artist", "Album", "Year", "Lyrics", "YouTube", "Color Coded", "Fandom"];
+  const rows = playlist.tracks.map((t) => {
+    const trackName = t?.track ?? "unknown track";
+    const artistName = t?.artist ?? "unknown artist";
+    const albumName = t?.album ?? "unknown album";
+    const year = t?.year ?? "unknown year";
+    const base = `${trackName} ${artistName}`;
+
+    return [
+      trackName,
+      `"${artistName}"`, 
+      albumName,
+      year,
+      google(`${base} lyrics site:genius.com OR site:azlyrics.com OR site:musixmatch.com`),
+      google(`${base} site:youtube.com`),
+      google(`${base} color coded lyrics`),
+      google(`${base} lyrics site:fandom.com`),
+    ];
+  });
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.join(",")),
+  ].join("\n");
+
+  return csvContent;
+}
+
+// Download CSV file
+function downloadCSV(playlist) {
+  const csvContent = generateCSV(playlist);
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${sanitizeFilename(playlist.name)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function App() {
   const [url, setUrl] = useState("");
   const [playlist, setPlaylist] = useState(null);
@@ -178,9 +228,26 @@ export default function App() {
       {/* playlist */}
       {playlist && (
         <>
-          <h2 className="text-xl font-semibold mt-6 mb-2 tracking-tight">
-            {playlist.name}
-          </h2>
+          {/* Playlist name with download button */}
+          <div className="flex items-center justify-between mt-6 mb-2">
+            <h2 className="text-xl font-semibold tracking-tight">
+              {playlist.name}
+            </h2>
+            <button
+              onClick={() => downloadCSV(playlist)}
+              className="group relative p-2 hover:opacity-80 transition"
+              title="download as csv"
+            >
+              <img 
+                src="/download_downarrow.png" 
+                alt="download" 
+                className="w-5 h-5"
+              />
+              <span className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                download as csv
+              </span>
+            </button>
+          </div>
 
           {/* mobile */}
           <div className="md:hidden space-y-4 mt-4">
