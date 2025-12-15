@@ -10,7 +10,8 @@ Search any Spotify playlist and get lyrics, videos, and more — directly from y
 
 ## Features
 
-* 🎵 Search **any public Spotify playlist** by URL
+* 🎵 Search **any public Spotify playlist** by URL 
+> ⚠️ **Note:** Due to Spotify API restrictions, playlists **must be public** and **user-made**. Official Spotify editorial playlists and private playlists cannot be accessed.
 * 🔐 Login with Spotify to access **private playlists** (Note: You must have a Spotify Developer account: [Spotify for Developers](https://developer.spotify.com/); see **"Spotify OAuth / Development Mode Notes"** for details on Development vs Extended Quota Mode)
 * 📊 Browse a **5-column table of sources for each track**:
   * **Track Info** (song title, album, artist(s), year)
@@ -33,7 +34,7 @@ By KPop Demon Hunters ([Spotify playlist link](https://open.spotify.com/playlist
 
 <img src="public/demo_playlist.png" width="650"/>
 
-> This playlist is from the official KPop Demon Hunters Spotify account and has been chosen because it includes both the Netflix show’s original soundtrack and K-pop songs — perfect for exploring YouTube videos, color-coded lyrics, and fandom wikis, which just a Genius search can’t provide.
+> This playlist is from the official KPop Demon Hunters Spotify account and has been chosen because it includes both the Netflix film’s original soundtrack and K-pop songs — perfect for exploring YouTube videos, color-coded lyrics, and fandom wikis, which just a Genius search can’t provide.
 
 ## ➡️ The App in Action
 
