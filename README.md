@@ -29,7 +29,7 @@ Search any Spotify playlist and get lyrics, videos, and more — directly from y
 Here’s an example using the playlist:
 
 **A Very KPop Demon Hunters Christmas 🎄**  
-By KPop Demon Hunters ([Spotify playlist link ](https://open.spotify.com/playlist/3dCgX2WosJLpneAyGQSFga?si=021fa5f7b84243e1))
+By KPop Demon Hunters ([Spotify playlist link](https://open.spotify.com/playlist/3dCgX2WosJLpneAyGQSFga?si=021fa5f7b84243e1))
 
 <img src="public/demo_playlist.png" width="650"/>
 
@@ -62,24 +62,27 @@ npm install
 2. Create an app
 3. Copy your `Client ID` and `Client Secret`
 4. Add **redirect URI** in your Spotify app settings:
-   * **Local development:** `http://127.0.0.1:8000/callback`
-   * **Production / deployed site (e.g., Vercel):** `https://your-app-name.vercel.app/callback`
-     
+- **Local development:** `http://127.0.0.1:5173/api/callback`
+- **Production / deployed site:** `https://your-app-name.vercel.app/api/callback`
+
+⚠️ Common issue: Using `localhost` instead of `127.0.0.1`, or a mismatched port/path, will break Spotify OAuth.  
+For more details, see [Redirect URIs | Spotify for Developers](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri).
+
 ### 3. Create `.env.local`
 
 ```env
 SPOTIFY_CLIENT_ID=your_client_id
 SPOTIFY_CLIENT_SECRET=your_client_secret
-SPOTIFY_REDIRECT_URI=http://127.0.0.1:8000/callback  # change to your deployed URL in production
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:5173/api/callback
 ```
-
+For production, set the same environment variables in your hosting provider (e.g., Vercel) using your deployed URL instead.
 
 ### 4. Run Development Server
 
 ```bash
-npm run dev -- --port 8000
+npm run dev
 ```
-Visit [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Visit [http://127.0.0.1:5173/](http://127.0.0.1:5173/)
 
 ---
 
