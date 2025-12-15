@@ -11,7 +11,7 @@ Search any Spotify playlist and get lyrics, videos, and more — directly from y
 ## Features
 
 * 🎵 Search **any public Spotify playlist** by URL
-* 🔐 Login with Spotify to access **private playlists** (note: you must have a Spotify Developer account: [Spotify for Developers](https://developer.spotify.com/))
+* 🔐 Login with Spotify to access **private playlists** (Note: You must have a Spotify Developer account: [Spotify for Developers](https://developer.spotify.com/); see **"Spotify OAuth / Development Mode Notes"** for details on Development vs Extended Quota Mode)
 * 📊 Browse a **5-column table of sources for each track**:
   * **Track Info** (song title, album, artist(s), year)
   * **Lyrics** (Genius / AZLyrics / Musixmatch)
@@ -62,8 +62,8 @@ npm install
 2. Create an app
 3. Copy your `Client ID` and `Client Secret`
 4. Add **redirect URI** in your Spotify app settings:
-- **Local development:** `http://127.0.0.1:5173/api/callback`
-- **Production / deployed site:** `https://your-app-name.vercel.app/api/callback`
+  * **Local development:** `http://127.0.0.1:5173/api/callback`
+  * **Production / deployed site:** `https://your-app-name.vercel.app/api/callback`
 
 ⚠️ Common issue: Using `localhost` instead of `127.0.0.1`, or a mismatched port/path, will break Spotify OAuth.  
 For more details, see [Redirect URIs | Spotify for Developers](https://developer.spotify.com/documentation/web-api/concepts/redirect_uri).
@@ -105,9 +105,25 @@ Can be deployed to:
 
 ---
 
+## Spotify OAuth / Development Mode Notes
+
+* The app supports OAuth login to access private playlists.
+* **Development Mode**:
+  * The **app owner** can always log in and access their private playlists.
+  * **Other users** must be **manually added** to the allowlist in the Spotify Developer Dashboard.
+  * Maximum of **25 users** in Development Mode.
+  * See more details about **Development vs Extended Quota Mode** here: [Spotify Quota Modes](https://developer.spotify.com/documentation/web-api/concepts/quota-modes)
+* **Extended / Public Mode**:
+  * If approved for Extended Quota Mode, your app can support a larger (or unlimited) number of users.
+  * This requires meeting Spotify’s criteria, such as having an established business and sufficient user activity.
+
+---
+
 ## ⚠️ Limitations / Notes
 
-* Private playlists require **Spotify login / OAuth** — public playlists work without authentication.
+* Private playlists require **Spotify login / OAuth** (public playlists work without authentication).
+   *  Note: Only users added to the allowlist can access private playlists in Development Mode. App owners are automatically allowed.
+   *  For information on limits and quota extension, see the "Spotify OAuth / Development Mode Notes" section.
 * Lyrics links are **search-based** (Genius, AZLyrics, Musixmatch) and may **not always point to the exact lyrics**.
 * YouTube videos and Fandom Wiki links may occasionally be missing if the track is rare or not widely documented.
 * **CSV export** contains Google search links (not direct lyrics) — perfect for batch research or sharing with others.

@@ -176,7 +176,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-black text-white p-4 sm:p-6">
       {/* header */}
-      <h1 className="text-2xl font-bold tracking-tight">
+      <h1 className="text-3xl font-bold tracking-tight">
         spotify playlist lyrics finder
       </h1>
       <p className="text-sm text-gray-400 mb-8">
@@ -215,7 +215,7 @@ export default function App() {
             FOR SPOTIFY DEVELOPERS ONLY
           </p>
           <p className="text-gray-400 text-xs mb-2">
-            access your private playlists too (*does not work if you don't have a Spotify Developer account*)
+            access your private playlists (*requires a Spotify Developer account; see README for details*)
           </p>
 
           {!token ? (
