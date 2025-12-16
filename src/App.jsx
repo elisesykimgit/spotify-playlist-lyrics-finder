@@ -177,7 +177,12 @@ export default function App() {
     <div className="min-h-screen bg-black text-white p-4 sm:p-6">
       {/* header */}
       <h1 className="text-3xl font-bold tracking-tight">
-        spotify playlist lyrics finder
+        <a
+          href="/"
+          className="text-white no-underline focus:outline-none focus:ring-2 focus:ring-gray-700 rounded-lg"
+        >
+          spotify playlist lyrics finder
+        </a>
       </h1>
       <p className="text-sm text-gray-400 mb-8">
         get lyrics, youtube, and more — straight from ur playlist
