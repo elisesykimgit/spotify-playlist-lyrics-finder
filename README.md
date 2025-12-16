@@ -20,6 +20,7 @@ Search any Spotify playlist and get lyrics, videos, and more — directly from y
   * **Color Coded Lyrics**
   * **Fandom Wiki pages**
 * 📥 **Download your results as CSV** — export all tracks with their links for easy sharing or reference
+* 🔍 **Search and sort within your playlist**
 * 🎨 Clean, **dark Spotify-inspired UI** optimized for desktop and mobile
 * 🌏 Especially helpful for **K-pop, other-language songs, and fictional tracks** from animated shows
 
@@ -44,6 +45,30 @@ You can also **download all results as a CSV file** using the ⬇️ download bu
 
 <img src="public/demo_output.png" width="1300"/>
 
+### More Features:
+
+#### 🔍 Search and Sort within playlist
+
+You can also **search directly within the playlist** and **change how tracks are displayed**, without modifying the original playlist order or the CSV export.
+
+<img src="public/demo_sort_search_features.png" width="1200"/>
+
+* Use **search in playlist** to filter tracks by **track name, artist, or album**
+* Search uses Spotify-style matching and ignores punctuation (such as parentheses and hyphens)
+* Use **view as** to switch between:
+  * default playlist order
+  * artist (a–z / z–a)
+  * track (a–z / z–a)
+ 
+#### 🔍 search + sort combined
+
+Search and sorting can be combined: 
+
+Here, the demo playlist is 1) sorted by **track name (a–z)** and 2) filtered to only **KPop Demon Hunters** tracks, without changing the original playlist order.
+
+<img src="public/demo_playlist_search_sorted.png" width="1200"/>
+
+> Tip: Press **Cmd + F / Ctrl + F** to instantly search within the playlist. (and **Esc** to clear search)
 
 ---
 

@@ -1,5 +1,4 @@
-// App.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 
 // env
 const API_BASE = "";
@@ -7,6 +6,15 @@ const API_BASE = "";
 // helpers
 function google(q) {
   return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+}
+
+// normalize names of track, artist, etc. 
+function normalize(str) {
+  return str
+    .toLowerCase()
+    .replace(/[()\-–—.,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 // Sanitize filename for CSV download
@@ -22,7 +30,7 @@ function csvField(field) {
   return `"${String(field).replace(/"/g, '""')}"`;
 }
 
-// Generate CSV content
+// Generate CSV content (always export original order)
 function generateCSV(playlist) {
   const headers = [
     "Track",
@@ -82,9 +90,59 @@ export default function App() {
   const [url, setUrl] = useState("");
   const [playlist, setPlaylist] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
   const [error, setError] = useState("");
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
+  const [viewMode, setViewMode] = useState("default order");
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef(null);
+  const viewMenuRef = useRef(null);
+
+  // --------- Command/Ctrl+F + esc key -> app's playlist search ---------
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isMac = navigator.platform.toUpperCase().includes("MAC");
+      const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+  
+      // Cmd/Ctrl + F → focus playlist search
+      if (isCmdOrCtrl && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
+  
+      // ESC → clear playlist search
+      if (e.key === "Escape") {
+        if (searchQuery) {
+          setSearchQuery("");
+          searchInputRef.current?.blur();
+        }
+  
+        setViewOpen(false);
+      }
+    };
+  
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [searchQuery]);
+
+  // --------- Close "view as" when clicking outside ---------
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (viewMenuRef.current && !viewMenuRef.current.contains(e.target)) {
+        setViewOpen(false);
+      }
+    };
+  
+    if (viewOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+  
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [viewOpen]);
 
   // ---------- OAuth: read token from URL ----------
   useEffect(() => {
@@ -172,6 +230,47 @@ export default function App() {
     if (!user) return "spotify user";
     return user.display_name || user.id || "spotify user";
   };
+
+  const sortedTracks = useMemo(() => {
+    if (!playlist) return [];
+
+    const tracks = [...playlist.tracks];
+
+    // Handle sorting based on viewMode
+    switch (viewMode) {
+      case "artist (a–z)":
+        return tracks.sort((a, b) => (a.artist ?? "").localeCompare(b.artist ?? ""));
+      case "artist (z–a)":
+        return tracks.sort((a, b) => (b.artist ?? "").localeCompare(a.artist ?? ""));
+      case "track (a–z)":
+        return tracks.sort((a, b) => (a.track ?? "").localeCompare(b.track ?? ""));
+      case "track (z–a)":
+        return tracks.sort((a, b) => (b.track ?? "").localeCompare(a.track ?? ""));
+      case "default order":
+      default:
+        return tracks;
+    }
+  }, [playlist, viewMode]);
+  
+  const filteredTracks = useMemo(() => {
+    if (!searchQuery) return sortedTracks;
+  
+    // split query into meaningful tokens (ignore 1-char noise)
+    const tokens = normalize(searchQuery)
+      .split(" ")
+      .filter((t) => t.length > 1);
+  
+    if (tokens.length === 0) return sortedTracks;
+  
+    return sortedTracks.filter((t) => {
+      const haystack = normalize(
+        `${t?.track ?? ""} ${t?.artist ?? ""} ${t?.album ?? ""}`
+      );
+  
+      // ALL meaningful tokens must match (spotify-lite strictness)
+      return tokens.every((token) => haystack.includes(token));
+    });
+  }, [sortedTracks, searchQuery]);
 
   return (
     <div className="min-h-screen bg-black text-white p-4 sm:p-6">
@@ -273,9 +372,119 @@ export default function App() {
             </button>
           </div>
 
+          {/* view as + search controls */}
+          <div className="flex justify-between mt-8 gap-4">
+            {/* view as */}
+            <div ref={viewMenuRef} className="relative">
+              <button
+                onClick={() => setViewOpen((v) => !v)}
+                className="
+                  h-8 px-2 text-[11px]
+                  text-gray-400
+                  bg-gray-900/20
+                  border border-gray-700/10
+                  rounded
+                  hover:text-gray-300
+                  hover:border-gray-600/30
+                  focus:outline-none
+                "
+              >
+                view as: {viewMode}
+              </button>
+            
+              {viewOpen && (
+                <div
+                  className="
+                    absolute left-0 mt-1 w-36
+                    rounded
+                    bg-gray-900/95
+                    border border-gray-700/20
+                    shadow-lg
+                    z-20
+                  "
+                >
+                  {[
+                    "default order",
+                    "artist (a–z)",
+                    "artist (z–a)",
+                    "track (a–z)",
+                    "track (z–a)",
+                  ].map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        setViewMode(option);
+                        setViewOpen(false);
+                      }}
+                      className={`
+                        w-full text-left px-2 py-1.5 text-[11px]
+                        ${
+                          viewMode === option
+                            ? "text-white bg-gray-800/70"
+                            : "text-gray-400 hover:text-white hover:bg-gray-800/40"
+                        }
+                      `}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          
+            {/* search */}
+            <div className="relative">
+              {/* search icon */}
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  {/* lens */}
+                  <circle cx="11" cy="11" r="6" />
+                  {/* handle */}
+                  <line x1="16" y1="16" x2="21" y2="21" />
+                </svg>
+              </span>
+          
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="search in playlist"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="
+                  h-8 w-44 pl-7 pr-6 text-[11px] leading-none
+                  text-gray-300 placeholder-gray-500
+                  bg-gray-900/20
+                  border border-gray-600/20
+                  rounded
+                  focus:outline-none focus:border-gray-400
+                "
+              />
+          
+              {/* clear (x) */}
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 text-sm"
+                  aria-label="clear search"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* mobile */}
           <div className="md:hidden space-y-4 mt-4">
-            {playlist.tracks.map((t, i) => {
+            {filteredTracks.map((t, i) => {
               const trackName = t?.track ?? "unknown track";
               const artistName = t?.artist ?? "unknown artist";
               const albumName = t?.album ?? "unknown album";
@@ -355,7 +564,7 @@ export default function App() {
               </thead>
 
               <tbody>
-                {playlist.tracks.map((t, i) => {
+                {filteredTracks.map((t, i) => {
                   const trackName = t?.track ?? "unknown track";
                   const artistName = t?.artist ?? "unknown artist";
                   const albumName = t?.album ?? "unknown album";
