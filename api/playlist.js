@@ -9,7 +9,9 @@ async function getClientToken() {
     throw new Error("Missing Spotify credentials");
   }
 
-  const auth = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString("base64");
+  const auth = Buffer.from(
+    `${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`
+  ).toString("base64");
 
   const res = await fetch(TOKEN_URL, {
     method: "POST",
@@ -22,7 +24,9 @@ async function getClientToken() {
 
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
-    throw new Error("Failed to get client credentials token: " + JSON.stringify(errData));
+    throw new Error(
+      "Failed to get client credentials token: " + JSON.stringify(errData)
+    );
   }
 
   const data = await res.json();
@@ -33,6 +37,14 @@ async function getClientToken() {
 function extractPlaylistId(url) {
   const match = url.match(/playlist\/([a-zA-Z0-9]+)(\?.*)?/);
   return match ? match[1] : null;
+}
+
+// Pick a small-ish album image for UI thumbnails
+function pickAlbumImage(track) {
+  const images = track?.album?.images;
+  if (!Array.isArray(images) || images.length === 0) return null;
+
+  return images[2]?.url || images[images.length - 1]?.url || images[0]?.url || null;
 }
 
 // Main handler
@@ -47,13 +59,17 @@ export default async function handler(req, res) {
 
   try {
     const playlistUrl = req.query.url;
-    if (!playlistUrl) return res.status(400).json({ error: "missing playlist url" });
+    if (!playlistUrl)
+      return res.status(400).json({ error: "missing playlist url" });
 
     const playlistId = extractPlaylistId(playlistUrl);
-    if (!playlistId) return res.status(400).json({ error: "invalid spotify playlist url" });
+    if (!playlistId)
+      return res.status(400).json({ error: "invalid spotify playlist url" });
 
     const authHeader = req.headers.authorization;
-    const userToken = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const userToken = authHeader?.startsWith("Bearer ")
+      ? authHeader.substring(7)
+      : null;
 
     let accessToken;
     let tokenType;
@@ -69,9 +85,10 @@ export default async function handler(req, res) {
     console.log(`Using token type: ${tokenType}`);
 
     // Fetch playlist
-    const playlistRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const playlistRes = await fetch(
+      `https://api.spotify.com/v1/playlists/${playlistId}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
 
     if (!playlistRes.ok) {
       const errorData = await playlistRes.json().catch(() => ({}));
@@ -80,9 +97,10 @@ export default async function handler(req, res) {
       let msg = "failed to fetch playlist";
 
       if (playlistRes.status === 401) {
-        msg = tokenType === "USER TOKEN"
-          ? "user token invalid or expired, please login again"
-          : "client token invalid, try again later";
+        msg =
+          tokenType === "USER TOKEN"
+            ? "user token invalid or expired, please login again"
+            : "client token invalid, try again later";
       } else if (playlistRes.status === 403) {
         msg =
           tokenType === "CLIENT CREDENTIALS"
@@ -98,16 +116,27 @@ export default async function handler(req, res) {
     // Collect all tracks with pagination
     let tracks = [];
 
+    const mapItemToTrack = (item) => {
+      const tr = item?.track;
+      if (!tr) return null;
+
+      return {
+        track: tr.name,
+        artist: tr.artists?.map((a) => a.name).join(", "),
+        album: tr.album?.name,
+        year: tr.album?.release_date?.slice(0, 4),
+
+        // NEW: for album cover UI + click-to-open-on-spotify
+        albumImage: pickAlbumImage(tr),
+        trackUrl: tr.external_urls?.spotify || null,
+      };
+    };
+
     // Add first page tracks
     tracks.push(
       ...playlistData.tracks.items
-        .filter((i) => i.track)
-        .map((i) => ({
-          track: i.track.name,
-          artist: i.track.artists.map((a) => a.name).join(", "),
-          album: i.track.album?.name,
-          year: i.track.album?.release_date?.slice(0, 4),
-        }))
+        .map(mapItemToTrack)
+        .filter(Boolean)
     );
 
     // Fetch remaining pages
@@ -116,17 +145,21 @@ export default async function handler(req, res) {
       const trackRes = await fetch(next, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
+
+      if (!trackRes.ok) {
+        const errText = await trackRes.text().catch(() => "");
+        console.error("Spotify pagination error:", trackRes.status, errText);
+        break; // fail soft: return what we already have
+      }
+
       const trackData = await trackRes.json();
+
       tracks.push(
         ...trackData.items
-          .filter((i) => i.track)
-          .map((i) => ({
-            track: i.track.name,
-            artist: i.track.artists.map((a) => a.name).join(", "),
-            album: i.track.album?.name,
-            year: i.track.album?.release_date?.slice(0, 4),
-          }))
+          .map(mapItemToTrack)
+          .filter(Boolean)
       );
+
       next = trackData.next;
     }
 

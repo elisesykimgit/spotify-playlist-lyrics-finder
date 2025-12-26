@@ -45,6 +45,8 @@ You can also **download all results as a CSV file** using the ⬇️ download bu
 
 <img src="public/demo_output.png" width="1300"/>
 
+> Tip: Want to hear the track on Spotify? Just click the album image!
+
 ### More Features:
 
 #### 🔍 Search and Sort within playlist
